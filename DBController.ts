@@ -1,6 +1,7 @@
 import {Sequelize} from "sequelize";
 import * as dotenv from 'dotenv';
 import * as console from "node:console";
+import Dataset from "./Dataset.js";
 
 type addClientParams = {
     first_name: string,
@@ -38,21 +39,83 @@ export default class DBController {
     }
 
     addClient = async ({first_name, last_name, company_name, email}: addClientParams) => {
-        await this.sequelize?.query(
-            'INSERT INTO public.clients (first_name, last_name, company_name, email) VALUES (:first_name, :last_name, :company_name, :email)',
-            {
-                replacements: {first_name, last_name, company_name, email},
-                type: 'INSERT'
-            });
+        try {
+            await this.sequelize?.query(
+                'INSERT INTO public.clients (first_name, last_name, company_name, email) VALUES (:first_name, :last_name, :company_name, :email)',
+                {
+                    replacements: {first_name, last_name, company_name, email},
+                    type: 'INSERT'
+                });
+        } catch (error) {
+            console.error(error);
+            return;
+        }
+    }
+
+    removeClient = async (email: string) => {
+        email = email.trim();
+        try {
+            await this.sequelize?.query(
+                'DELETE FROM public.clients WHERE email = :email',
+                {
+                    replacements: {email},
+                    type: 'DELETE'
+                });
+        } catch (error) {
+            console.error(error);
+            return;
+        }
+    }
+
+    emailExistsInDB = async (email: string) => {
+        email = email.trim();
+        try {
+            const client = await this.sequelize?.query(
+                'SELECT * FROM public.clients WHERE email = :email',
+                {
+                    replacements: {email},
+                    type: 'SELECT'
+                }
+            );
+            return !!(client && client.length > 0);
+        } catch (error) {
+            console.error(error);
+            return false;
+        }
+    }
+
+    addPdfToLogs = async (dataset: Dataset) => {
+        try {
+            const emailExists = await this.emailExistsInDB(dataset.email);
+            if (!emailExists) {
+                console.error('Email not found in DB: ', dataset.email);
+                return;
+            }
+            await this.sequelize?.query(
+                'INSERT INTO public.pdf_logs (email, invoices) VALUES (:email, :invoices)',
+                {
+                    replacements: {email: dataset.email, invoices: JSON.stringify(dataset.invoices)},
+                    type: 'INSERT'
+                });
+        } catch (error) {
+            console.error(error);
+            return;
+        }
+    }
+
+    removePdfFromLogs = async (email: string) => {
+        email = email.trim();
+        try {
+            await this.sequelize?.query(
+                'DELETE FROM public.pdf_logs WHERE email = :email',
+                {
+                    replacements: {email},
+                    type: 'DELETE'
+                }
+            )
+        } catch (error) {
+            console.error(error);
+            return;
+        }
     }
 }
-
-const dbController = await new DBController().create();
-dbController?.addClient({
-    first_name: "test",
-    last_name: "testerson",
-    company_name: "testing",
-    email: "test@email.com_second"
-}).then(r => {
-    console.log(r);
-});
