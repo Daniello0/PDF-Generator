@@ -1,43 +1,34 @@
 import express, {json} from 'express';
 import cookieParser from "cookie-parser";
 import * as console from "node:console";
-import axios from 'axios'
+import DBController from "./DBController.js";
 import Dataset from "./Dataset.js";
 
 const app = express();
-const api = axios.create({
-    baseURL: 'http://localhost:3000'
-});
+
+const dbController = new DBController;
 
 app.use(json());
 app.use(cookieParser())
 
-app.get('/test', (req, res) => {
+app.get('/test', (_req, res) => {
     res.send('Hello World');
 });
 
-app.post('/api/post', (req, res) => {
-    const {email, invoices} = req.body;
-    res.send(JSON.stringify({email, invoices}, null, 2));
-})
-
-app.listen(3000, async () => {
-    console.log("Сервер запущен на http://localhost:3000");
-    await test();
-    await postTest();
+app.post('/api/post', async (req, res) => {
+    const dataset: Dataset = req.body;
+    console.log(dataset.email + " ON SERVER");
+    try {
+        console.log(await dbController.emailExistsInDB(dataset.email));
+        await dbController.addPdfToLogs(dataset);
+    } catch (error) {
+        console.error(error);
+        res.sendStatus(500);
+    }
+    res.sendStatus(200);
 });
 
-async function test() {
-    const res = await api.get('/test');
-    if (res) console.log(res.data);
-}
-
-async function postTest() {
-    const dataset = new Dataset('test@eamil.com');
-    dataset.addInvoice('work1', 100);
-    dataset.addInvoice('work2', 200);
-    const res = await api.post('/api/post', dataset);
-    if (res) {
-        console.log(res.data);
-    }
-}
+app.listen(3000, async () => {
+    await dbController.init();
+    console.log("Сервер запущен на http://localhost:3000");
+});
