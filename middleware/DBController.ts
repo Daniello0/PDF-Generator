@@ -1,7 +1,7 @@
 import {Sequelize} from "sequelize";
 import * as dotenv from 'dotenv';
 import * as console from "node:console";
-import Dataset from "./Dataset.js";
+import {Invoice} from "../models/Invoice.js";
 
 type addClientParams = {
     first_name: string,
@@ -87,17 +87,17 @@ export default class DBController {
         }
     }
 
-    addPdfToLogs = async (dataset: Dataset) => {
-        dataset.email = dataset.email.trim();
-        const emailExists = await this.emailExistsInDB(dataset.email);
+    addPdfToLogs = async (invoice: Invoice) => {
+        invoice.email = invoice.email.trim();
+        const emailExists = await this.emailExistsInDB(invoice.email);
         if (!emailExists) {
-            console.error('Email не найден в БД: ', dataset.email);
-            throw new Error('Email не найден в БД: ' + dataset.email);
+            console.error('Email не найден в БД: ', invoice.email);
+            throw new Error('Email не найден в БД: ' + invoice.email);
         }
         await this.sequelize?.query(
-            'INSERT INTO public.pdf_logs (email, invoices) VALUES (:email, :invoices)',
+            'INSERT INTO public.invoice_logs (email, invoices) VALUES (:email, :invoices)',
             {
-                replacements: {email: dataset.email, invoices: JSON.stringify(dataset.invoices)},
+                replacements: {email: invoice.email, invoices: JSON.stringify(invoice.works)},
                 type: 'INSERT'
             });
     }
@@ -106,7 +106,7 @@ export default class DBController {
         email = email.trim();
         try {
             await this.sequelize?.query(
-                'DELETE FROM public.pdf_logs WHERE email = :email',
+                'DELETE FROM public.invoice_logs WHERE email = :email',
                 {
                     replacements: {email},
                     type: 'DELETE'

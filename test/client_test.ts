@@ -1,4 +1,4 @@
-import Dataset from "./Dataset.js";
+import {Invoice} from "../models/Invoice.js";
 import axios from "axios";
 import * as console from "node:console";
 
@@ -7,7 +7,7 @@ const api = axios.create({
 });
 
 async function testAddPdfToLogs() {
-    const dataset = new Dataset('test_email@grsu.byuuu');
+    const dataset = new Invoice('test_email@grsu.byuuu');
     dataset.addInvoice('work1', 100);
     dataset.addInvoice('work2', 200);
 

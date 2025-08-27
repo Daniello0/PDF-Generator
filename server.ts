@@ -1,8 +1,8 @@
 import express, {json} from 'express';
 import cookieParser from "cookie-parser";
 import * as console from "node:console";
-import DBController from "./DBController.js";
-import Dataset from "./Dataset.js";
+import DBController from "./middleware/DBController.js";
+import {Invoice} from "./models/Invoice.js";
 
 const app = express();
 
@@ -16,7 +16,7 @@ app.get('/test', (_req, res) => {
 });
 
 app.post('/api/post', async (req, res) => {
-    const dataset: Dataset = req.body;
+    const dataset: Invoice = req.body;
     console.log(dataset.email + " ON SERVER");
     try {
         console.log(await dbController.emailExistsInDB(dataset.email));
