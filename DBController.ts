@@ -24,8 +24,8 @@ export default class DBController {
         const DATABASE_URL: string | undefined = process.env.DATABASE_URL;
 
         if (!DATABASE_URL) {
-            console.error("DATABASE_URL is not defined in .env file");
-            throw new Error("Database URL is not configured.");
+            console.error("DATABASE_URL не определен в .env файле");
+            throw new Error("DATABASE_URL не прописан в конфигурации.");
         }
 
         try {
@@ -35,9 +35,9 @@ export default class DBController {
             this.sequelize = sequelize;
             this.url = DATABASE_URL;
 
-            console.log('Connection has been established successfully.');
+            console.log('Соединение с БД выполнено.');
         } catch (error) {
-            console.error('Unable to connect to the database:', error);
+            console.error('Не удалось подключиться к БД: ', error);
             throw error;
         }
     }
@@ -72,7 +72,7 @@ export default class DBController {
     emailExistsInDB = async (email: string) => {
         email = email.trim();
         if (!this.sequelize) {
-            throw new Error("Sequelize instance is not initialized.");
+            throw new Error("Sequelize не инициализирован.");
         }
         const client = await this.sequelize.query(
             'SELECT * FROM public.clients WHERE email = :email',
@@ -91,8 +91,8 @@ export default class DBController {
         dataset.email = dataset.email.trim();
         const emailExists = await this.emailExistsInDB(dataset.email);
         if (!emailExists) {
-            console.error('Email not found in DB: ', dataset.email);
-            throw new Error('Email not found in DB: ' + dataset.email);
+            console.error('Email не найден в БД: ', dataset.email);
+            throw new Error('Email не найден в БД: ' + dataset.email);
         }
         await this.sequelize?.query(
             'INSERT INTO public.pdf_logs (email, invoices) VALUES (:email, :invoices)',
