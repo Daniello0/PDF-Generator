@@ -2,13 +2,13 @@ import * as htmlToPdf from 'html-pdf-node';
 import * as fs from 'fs';
 import React from "react";
 import PdfView from "../views/PdfView.js";
-// @ts-ignore импортирует
-import { renderToStaticMarkup } from 'react-dom/server.js';
+import { renderToStaticMarkup } from 'react-dom/server';
+import * as path from "node:path";
 
 export default class PdfGenerator {
-    static async generatePdf(Component: React.ReactElement): Promise<void> {
+    static async generatePdf(reactElement: React.ReactElement): Promise<void> {
 
-        const htmlPage: string = renderToStaticMarkup(Component);
+        const htmlPage: string = renderToStaticMarkup(reactElement);
 
         const file = {
             content: htmlPage
@@ -16,10 +16,12 @@ export default class PdfGenerator {
 
         const options = {
             format: 'A4',
-        };
-
-        const testFile = {
-            content: '<div>Hello World from PDF!</div>',
+            margin: {
+                top: "20mm",
+                right: "20mm",
+                bottom: "20mm",
+                left: "20mm"
+            }
         };
 
         try {
@@ -27,35 +29,47 @@ export default class PdfGenerator {
 
             if (Buffer.isBuffer(pdfBuffer)) {
                 fs.writeFileSync('invoice.pdf', pdfBuffer);
-                console.log('PDF успешно создан');
+                console.log('PDF успешно создан: invoice.pdf');
             } else {
-                console.error('Ожидался Buffer: ', typeof pdfBuffer);
+                console.error('Ошибка: html-pdf-node не вернул Buffer.', typeof pdfBuffer);
             }
         } catch (error) {
-            console.error('Ошибка при создании PDF: ', error);
+            console.error('Ошибка при создании PDF:', error);
             throw error;
         }
     }
 }
 
-await PdfGenerator.generatePdf(PdfView({
-    client: {
-        firstName: "test",
-        lastName: "testerson",
-        companyName: "Company Inc",
-        email: "test@email.com"
-    },
-    invoice: {
-        id: 666,
-        email: "test@email.com",
-        createdAt: "06.01.2006 18:34",
-        works: [
-            {name: "Работа 1", cost: 300},
-            {name: "Работа 2", cost: 500},
-            {name: "Работа 3", cost: 178}
-        ],
-        addInvoice: function (work: string, cost: number): void {
-            this.works.push({name: work, cost: cost});
-        }
+// тесты
+
+const client = {
+    firstName: "Иван",
+    lastName: "Иванов",
+    companyName: "ООО Тестовая",
+    email: "ivan.ivanov@example.com"
+};
+
+const invoice = {
+    id: 666,
+    email: "ivan.ivanov@example.com",
+    createdAt: new Date().toISOString(),
+    works: [
+        { name: "Разработка логотипа", cost: 150 },
+        { name: "Верстка главной страницы", cost: 200 },
+        { name: "Настройка аналитики", cost: 750 }
+    ],
+    addInvoice: () => {
+        throw Error("addInvoice не определен");
     }
-}));
+};
+
+const cssFilePath = path.resolve(process.cwd(), './views/PdfView.css');
+const cssString = fs.readFileSync(cssFilePath, 'utf8');
+
+const reactComponentWithProps = <PdfView
+    invoice={invoice}
+    client={client}
+    styles={cssString}
+/>;
+
+await PdfGenerator.generatePdf(reactComponentWithProps);
