@@ -1,12 +1,9 @@
 import * as htmlToPdf from 'html-pdf-node';
-import * as fs from 'fs';
 import React from "react";
-import PdfView from "../views/PdfView.js";
 import { renderToStaticMarkup } from 'react-dom/server';
-import * as path from "node:path";
 
 export default class PdfGenerator {
-    static async generatePdf(reactElement: React.ReactElement): Promise<void> {
+    static async generatePdf(reactElement: React.ReactElement): Promise<Buffer> {
 
         const htmlPage: string = renderToStaticMarkup(reactElement);
 
@@ -28,10 +25,11 @@ export default class PdfGenerator {
             const pdfBuffer = await htmlToPdf.generatePdf(file, options);
 
             if (Buffer.isBuffer(pdfBuffer)) {
-                fs.writeFileSync('invoice.pdf', pdfBuffer);
                 console.log('PDF успешно создан: invoice.pdf');
+                return pdfBuffer;
             } else {
                 console.error('Ошибка: html-pdf-node не вернул Buffer.', typeof pdfBuffer);
+                throw new Error("Ошибка: html-pdf-node не вернул Buffer.");
             }
         } catch (error) {
             console.error('Ошибка при создании PDF:', error);
@@ -39,37 +37,3 @@ export default class PdfGenerator {
         }
     }
 }
-
-// тесты
-
-const client = {
-    firstName: "Иван",
-    lastName: "Иванов",
-    companyName: "ООО Тестовая",
-    email: "ivan.ivanov@example.com"
-};
-
-const invoice = {
-    id: 666,
-    email: "ivan.ivanov@example.com",
-    createdAt: new Date().toISOString(),
-    works: [
-        { name: "Разработка логотипа", cost: 150 },
-        { name: "Верстка главной страницы", cost: 200 },
-        { name: "Настройка аналитики", cost: 750 }
-    ],
-    addInvoice: () => {
-        throw Error("addInvoice не определен");
-    }
-};
-
-const cssFilePath = path.resolve(process.cwd(), './views/PdfView.css');
-const cssString = fs.readFileSync(cssFilePath, 'utf8');
-
-const reactComponentWithProps = <PdfView
-    invoice={invoice}
-    client={client}
-    styles={cssString}
-/>;
-
-await PdfGenerator.generatePdf(reactComponentWithProps);
