@@ -1,65 +1,76 @@
-import { Queue, Worker, Job } from 'bullmq';
+import { Queue, Worker, Job } from "bullmq";
 import IORedis, { Redis } from "ioredis";
 import Factory from "./Factory.js";
 import * as console from "node:console";
 
 // @ts-ignore
 export const redisConnection = new IORedis({
-    host: process.env.REDIS_HOST || '127.0.0.1',
-    port: parseInt(process.env.REDIS_PORT || '6379'),
-    maxRetriesPerRequest: null // Указываем явно, что хотим бесконечные попытки
+  host: process.env.REDIS_HOST || "127.0.0.1",
+  port: parseInt(process.env.REDIS_PORT || "6379"),
+  maxRetriesPerRequest: null,
 });
 
 export default class QueueController {
-    name: string;
-    queue: Queue;
-    worker: Worker;
+  name: string;
+  queue: Queue;
+  worker: Worker;
 
-    private readonly connection: Redis;
+  private readonly connection: Redis;
 
-    constructor(name: string, connection: Redis) {
-        this.name = name;
-        this.connection = connection;
+  constructor(name: string, connection: Redis) {
+    this.name = name;
+    this.connection = connection;
 
-        this.queue = new Queue(name, { connection: this.connection });
+    this.queue = new Queue(name, { connection: this.connection });
 
-        this.worker = new Worker(name, this.processJob, { connection: this.connection });
+    this.worker = new Worker(name, this.processJob, {
+      connection: this.connection,
+    });
 
-        this.setupWorkerEvents();
-    }
+    this.setupWorkerEvents();
+  }
 
-    private async processJob(job: Job): Promise<any> {
-        console.log(`Начал обрабатывать инвойс #${job.data.invoice.id} с данными:`, job.data.invoice);
+  private async processJob(job: Job): Promise<object> {
+    console.log(
+      `Начал обрабатывать инвойс #${job.data.invoice.id} с данными:`,
+      job.data.invoice,
+    );
 
-        console.log(job.data.client);
-        console.log(job.data.invoice);
+    console.log(job.data.client);
+    console.log(job.data.invoice);
 
-        await Factory.generateAndSendPdfToClient({
-            client: job.data.client,
-            invoice: job.data.invoice,
-        });
+    await Factory.generateAndSendPdfToClient({
+      client: job.data.client,
+      invoice: job.data.invoice,
+    });
 
-        console.log(`Завершил обработку инвойса #${job.data.invoice.id}`);
-        return { received: job.data, processed: true };
-    }
+    console.log(`Завершил обработку инвойса #${job.data.invoice.id}`);
+    return { received: job.data, processed: true };
+  }
 
-    private setupWorkerEvents(): void {
-        this.worker.on('completed', (job, result) => {
-            console.log(`Worker '${this.name}': Инвойс ${job.data.invoice.id} успешно отправлен!
-             Результат:`, result);
-        });
+  private setupWorkerEvents(): void {
+    this.worker.on("completed", (job, result) => {
+      console.log(
+        `Worker '${this.name}': Инвойс ${job.data.invoice.id} успешно отправлен!
+             Результат:`,
+        result,
+      );
+    });
 
-        this.worker.on('failed', (job, err) => {
-            console.log(`Worker '${this.name}': Ошибка в инвойсе ${job?.data.invoice.id}!`, err);
-        });
-    }
+    this.worker.on("failed", (job, err) => {
+      console.log(
+        `Worker '${this.name}': Ошибка в инвойсе ${job?.data.invoice.id}!`,
+        err,
+      );
+    });
+  }
 
-    async addDataToQueue(data: any): Promise<Job> {
-        return this.queue.add(this.name, data);
-    }
+  async addDataToQueue(data: object): Promise<Job> {
+    return this.queue.add(this.name, data);
+  }
 
-    async close(): Promise<void> {
-        await this.worker.close();
-        await this.queue.close();
-    }
+  async close(): Promise<void> {
+    await this.worker.close();
+    await this.queue.close();
+  }
 }

@@ -3,9 +3,7 @@
     "jsx": "react",
     "target": "ES2022",
     "module": "NodeNext",
-    "lib": [
-      "ES2022"
-    ],
+    "lib": ["ES2022"],
     "moduleResolution": "NodeNext",
     "rootDir": "./",
     "outDir": "./dist",
@@ -18,17 +16,9 @@
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
-      "*": [
-        "node_modules/*"
-      ]
+      "*": ["node_modules/*"]
     }
   },
-  "include": [
-    "**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "build"
-  ]
+  "include": ["**/*"],
+  "exclude": ["node_modules", "dist", "build"]
 }
