@@ -4,13 +4,6 @@ import * as console from "node:console";
 import {Invoice, InvoiceLog} from "../models/Invoice.js";
 import {Client} from "../models/Client.js";
 
-type addClientParams = {
-    first_name: string,
-    last_name: string,
-    company_name: string,
-    email: string
-}
-
 export default class DBController {
     sequelize: Sequelize | undefined;
     url: string | undefined;
@@ -43,44 +36,19 @@ export default class DBController {
         }
     }
 
-    addClient = async ({first_name, last_name, company_name, email}: addClientParams) => {
-        try {
-            await this.sequelize?.query(
-                'INSERT INTO public.clients (first_name, last_name, company_name, email) VALUES (:first_name, :last_name, :company_name, :email)',
-                {
-                    replacements: {first_name, last_name, company_name, email},
-                    type: 'INSERT'
-                });
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    removeClient = async (email: string) => {
-        email = email.trim();
-        try {
-            await this.sequelize?.query(
-                'DELETE FROM public.clients WHERE email = :email',
-                {
-                    replacements: {email},
-                    type: 'DELETE'
-                });
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    async getClient(email: string): Promise<Client | null> { // <-- Изменили на Client | null
+    async getClient(email: string): Promise<Client> {
         email = email.trim();
         if (!this.sequelize) {
             throw new Error("Соединение с БД не установлено (sequelize is undefined).");
         }
 
         try {
+            // @ts-ignore
             return await this.sequelize.query<Client>(
                 'SELECT * FROM public.clients WHERE email = :email LIMIT 1;', // LIMIT 1 здесь тоже важен
                 {
                     replacements: {email},
+                    // @ts-ignore
                     type: 'SELECT',
                     plain: true,
                 }
@@ -125,33 +93,20 @@ export default class DBController {
             });
     }
 
-    removeInvoiceFromLogs = async (email: string) => {
-        email = email.trim();
-        try {
-            await this.sequelize?.query(
-                'DELETE FROM public.invoice_logs WHERE email = :email',
-                {
-                    replacements: {email},
-                    type: 'DELETE'
-                }
-            )
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    async getInvoiceFromLogs(email: string): Promise<InvoiceLog[]> {
+    async getInvoiceFromLogs(email: string): Promise<InvoiceLog> {
         email = email.trim();
         if (!this.sequelize) {
             throw new Error("Соединение с БД не установлено (sequelize is undefined).");
         }
 
         try {
+            // @ts-ignore
             return await this.sequelize.query<InvoiceLog>(
-                `SELECT * FROM public.invoice_logs WHERE c.email = :email;`,
+                `SELECT * FROM public.invoice_logs WHERE email = :email;`,
                 {
                     replacements: {email},
                     plain: true,
+                    // @ts-ignore
                     type: 'SELECT',
                 }
             );

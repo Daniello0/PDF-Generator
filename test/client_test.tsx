@@ -1,12 +1,6 @@
 import {Invoice} from "../models/Invoice.js";
 import axios from "axios";
 import * as console from "node:console";
-import path from "node:path";
-import fs from "fs";
-import PdfView from "../views/PdfView.js";
-import PdfGenerator from "../middleware/PdfGenerator.js";
-import React from "react";
-import MailSender from "../middleware/MailSender.js";
 
 const api = axios.create({
     baseURL: 'http://localhost:3000'
@@ -14,8 +8,8 @@ const api = axios.create({
 
 async function testPostRequest() {
     const dataset = new Invoice('daniilreservemail@gmail.com');
-    dataset.addInvoice('Тестовая работа 1', 100);
-    dataset.addInvoice('Тестовая работа 2', 200);
+    dataset.addInvoice('Работа 1', 100);
+    dataset.addInvoice('Работа 2', 200);
     dataset.addInvoice('Скидка', -30);
 
     console.log(JSON.stringify(dataset, null, 2));
@@ -24,41 +18,6 @@ async function testPostRequest() {
     if (res) {
         console.log(res.status);
     }
-}
-
-async function sendMailToAddress(emailAddress: string) {
-    const client = {
-        firstName: "Иван",
-        lastName: "Иванов",
-        companyName: "Иванов Inc",
-        email: emailAddress,
-    };
-
-    const invoice = {
-        id: 1,
-        email: emailAddress,
-        createdAt: new Date().toISOString(),
-        works: [
-            { name: "Дизайн", cost: 300 },
-            { name: "Обновления", cost: 150 },
-            { name: "Скидка", cost: -50 }
-        ],
-        addInvoice: () => {
-            throw Error("addInvoice не определен");
-        }
-    };
-
-    const cssFilePath = path.resolve(process.cwd(), './views/PdfView.css');
-    const cssString = fs.readFileSync(cssFilePath, 'utf8');
-
-    const reactComponentWithProps = <PdfView
-        invoice={invoice}
-        client={client}
-        styles={cssString}
-    />;
-
-    const pdfBuffer: Buffer = await PdfGenerator.generatePdf(reactComponentWithProps);
-    await MailSender.sendPdfToClient(client.email, pdfBuffer);
 }
 
 // ТЕСТЫ

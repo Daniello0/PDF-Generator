@@ -3,7 +3,7 @@ import {Client} from "../models/Client.js";
 import {Invoice} from "../models/Invoice.js";
 
 export default function PdfView({client, invoice, styles}: { client: Client, invoice: Invoice, styles: string }) {
-    let formattedDate: string = invoice.created_at || "";
+    let formattedDate: string = invoice.created_at.toLocaleString('ru-RU') || "";
     if (invoice.created_at) {
         formattedDate = new Date(invoice.created_at).toLocaleDateString('ru-RU', {
             day: '2-digit',
@@ -33,8 +33,8 @@ export default function PdfView({client, invoice, styles}: { client: Client, inv
 
                     <div className="client">
                         <h3>Клиент</h3>
-                        <p>{client.firstName} {client.lastName}</p>
-                        <p>{client.companyName}</p>
+                        <p>{client.first_name} {client.last_name}</p>
+                        <p>{client.company_name}</p>
                         <p>{client.email}</p>
                     </div>
                 </div>

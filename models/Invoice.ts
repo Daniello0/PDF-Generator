@@ -14,7 +14,7 @@ export interface InvoiceLog {
 
 export class Invoice {
     id?: number;
-    created_at?: string;
+    created_at?: Date;
     email: string = "";
     works: Work[] = [];
 

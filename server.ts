@@ -6,13 +6,6 @@ import {Invoice, InvoiceLog} from "./models/Invoice.js";
 import QueueController, {redisConnection} from "./middleware/QueueController.js";
 import {Client} from "./models/Client.js";
 
-interface RawInvoiceFromDB {
-    id: number;
-    email: string;
-    created_at: string;
-    works: string;
-}
-
 const app = express();
 
 const dbController = new DBController;
@@ -35,17 +28,15 @@ app.post('/api/invoice', async (req, res) => {
         const invoiceFromDb: InvoiceLog = await dbController.getInvoiceFromLogs(dataset.email);
 
         const invoice: Invoice = new Invoice(dataset.email);
-        invoice.id = invoiceFromDb.id;
         invoice.works = JSON.parse(invoiceFromDb.works);
+        invoice.id = invoiceFromDb.id;
+        invoice.created_at = invoiceFromDb.created_at
 
         console.log(client, invoice);
 
         // 3: добавить данные в очередь и обработать
         const queueController = new QueueController('pdf-generator', redisConnection);
-        await queueController.addDataToQueue({client, invoice});
-
-        // 4: закрыть очередь
-        // await queueController.close();
+        await queueController.addDataToQueue({client: client, invoice: invoice});
 
     } catch (error) {
         console.error(error);
@@ -54,7 +45,7 @@ app.post('/api/invoice', async (req, res) => {
     res.sendStatus(200);
 });
 
-app.post('/api/client', (req, res) => {
+app.post('/api/client', (_req, res) => {
     res.sendStatus(500);
 })
 
