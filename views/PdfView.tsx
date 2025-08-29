@@ -3,9 +3,9 @@ import {Client} from "../models/Client.js";
 import {Invoice} from "../models/Invoice.js";
 
 export default function PdfView({client, invoice, styles}: { client: Client, invoice: Invoice, styles: string }) {
-    let formattedDate: string = invoice.createdAt || "";
-    if (invoice.createdAt) {
-        formattedDate = new Date(invoice.createdAt).toLocaleDateString('ru-RU', {
+    let formattedDate: string = invoice.created_at || "";
+    if (invoice.created_at) {
+        formattedDate = new Date(invoice.created_at).toLocaleDateString('ru-RU', {
             day: '2-digit',
             month: 'long',
             year: 'numeric'

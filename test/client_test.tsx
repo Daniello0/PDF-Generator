@@ -12,14 +12,15 @@ const api = axios.create({
     baseURL: 'http://localhost:3000'
 });
 
-async function testAddPdfToLogs() {
-    const dataset = new Invoice('test_email@grsu.byuuu');
-    dataset.addInvoice('work1', 100);
-    dataset.addInvoice('work2', 200);
+async function testPostRequest() {
+    const dataset = new Invoice('daniilreservemail@gmail.com');
+    dataset.addInvoice('Тестовая работа 1', 100);
+    dataset.addInvoice('Тестовая работа 2', 200);
+    dataset.addInvoice('Скидка', -30);
 
     console.log(JSON.stringify(dataset, null, 2));
 
-    const res = await api.post('/api/post', dataset);
+    const res = await api.post('/api/invoice', dataset);
     if (res) {
         console.log(res.status);
     }
@@ -61,4 +62,4 @@ async function sendMailToAddress(emailAddress: string) {
 }
 
 // ТЕСТЫ
-await sendMailToAddress('daniilreservemail@gmail.com');
+await testPostRequest();

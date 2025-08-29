@@ -3,9 +3,18 @@ export interface Work {
     cost: number;
 }
 
+export interface InvoiceLog {
+    id: number;
+    client_id: number;
+    total_amount: number;
+    status: string;
+    created_at: Date;
+    works: string;
+}
+
 export class Invoice {
     id?: number;
-    createdAt?: string;
+    created_at?: string;
     email: string = "";
     works: Work[] = [];
 

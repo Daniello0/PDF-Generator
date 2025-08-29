@@ -1,7 +1,8 @@
 import {Sequelize} from "sequelize";
 import * as dotenv from 'dotenv';
 import * as console from "node:console";
-import {Invoice} from "../models/Invoice.js";
+import {Invoice, InvoiceLog} from "../models/Invoice.js";
+import {Client} from "../models/Client.js";
 
 type addClientParams = {
     first_name: string,
@@ -69,6 +70,28 @@ export default class DBController {
         }
     }
 
+    async getClient(email: string): Promise<Client | null> { // <-- Изменили на Client | null
+        email = email.trim();
+        if (!this.sequelize) {
+            throw new Error("Соединение с БД не установлено (sequelize is undefined).");
+        }
+
+        try {
+            return await this.sequelize.query<Client>(
+                'SELECT * FROM public.clients WHERE email = :email LIMIT 1;', // LIMIT 1 здесь тоже важен
+                {
+                    replacements: {email},
+                    type: 'SELECT',
+                    plain: true,
+                }
+            );
+
+        } catch (error) {
+            console.error(`Ошибка при получении клиента с email ${email}:`, error);
+            throw error;
+        }
+    }
+
     emailExistsInDB = async (email: string) => {
         email = email.trim();
         if (!this.sequelize) {
@@ -87,7 +110,7 @@ export default class DBController {
         }
     }
 
-    addPdfToLogs = async (invoice: Invoice) => {
+    checkEmailExistsAddInvoiceToLogs = async (invoice: Invoice) => {
         invoice.email = invoice.email.trim();
         const emailExists = await this.emailExistsInDB(invoice.email);
         if (!emailExists) {
@@ -95,14 +118,14 @@ export default class DBController {
             throw new Error('Email не найден в БД: ' + invoice.email);
         }
         await this.sequelize?.query(
-            'INSERT INTO public.invoice_logs (email, invoices) VALUES (:email, :invoices)',
+            'INSERT INTO public.invoice_logs (email, works) VALUES (:email, :invoices)',
             {
                 replacements: {email: invoice.email, invoices: JSON.stringify(invoice.works)},
                 type: 'INSERT'
             });
     }
 
-    removePdfFromLogs = async (email: string) => {
+    removeInvoiceFromLogs = async (email: string) => {
         email = email.trim();
         try {
             await this.sequelize?.query(
@@ -113,6 +136,27 @@ export default class DBController {
                 }
             )
         } catch (error) {
+            throw error;
+        }
+    }
+
+    async getInvoiceFromLogs(email: string): Promise<InvoiceLog[]> {
+        email = email.trim();
+        if (!this.sequelize) {
+            throw new Error("Соединение с БД не установлено (sequelize is undefined).");
+        }
+
+        try {
+            return await this.sequelize.query<InvoiceLog>(
+                `SELECT * FROM public.invoice_logs WHERE c.email = :email;`,
+                {
+                    replacements: {email},
+                    plain: true,
+                    type: 'SELECT',
+                }
+            );
+        } catch (error) {
+            console.error(`Ошибка при получении логов для email ${email}:`, error);
             throw error;
         }
     }

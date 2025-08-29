@@ -9,8 +9,7 @@ import PdfView from "../views/PdfView.js";
 
 export default class Factory {
     static async generateAndSendPdfToClient({client, invoice}: {client: Client, invoice: Invoice}) {
-        const cssFilePath = path.resolve(process.cwd(), './views/PdfView.css');
-        const cssString = fs.readFileSync(cssFilePath, 'utf8');
+        const cssString = this.getCssString('./views/PdfView.css')
 
         const reactComponentWithProps = <PdfView
             invoice={invoice}
@@ -20,5 +19,10 @@ export default class Factory {
 
         const pdfBuffer: Buffer = await PdfGenerator.generatePdf(reactComponentWithProps);
         await MailSender.sendPdfToClient(client.email, pdfBuffer);
+    }
+
+    static getCssString(filepath: string) {
+        const cssFilePath = path.resolve(process.cwd(), filepath);
+        return fs.readFileSync(cssFilePath, 'utf8');
     }
 }
