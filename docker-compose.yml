@@ -9,6 +9,9 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=${REDIS_PORT}
       - NODE_ENV=${NODE_ENV}
+      - GMAIL_USER=${GMAIL_USER}
+      - GMAIL_APP_PASS=${GMAIL_APP_PASS}
+      - APP_PORT=${APP_PORT}
     depends_on:
       - db
       - redis

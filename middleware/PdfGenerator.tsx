@@ -3,7 +3,7 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 export default class PdfGenerator {
-  static async generatePdf(reactElement: React.ReactElement): Promise<Buffer> {
+  static async generateInvoicePdf(reactElement: React.ReactElement): Promise<Buffer> {
     const htmlPage: string = renderToStaticMarkup(reactElement);
 
     const file = {
@@ -34,7 +34,6 @@ export default class PdfGenerator {
         throw new Error("Ошибка: html-pdf-node не вернул Buffer.");
       }
     } catch (error) {
-      console.error("Ошибка при создании PDF:", error);
       throw error;
     }
   }

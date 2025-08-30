@@ -18,34 +18,39 @@ export default class QueueController {
   private readonly connection: Redis;
 
   constructor(name: string, connection: Redis) {
-    this.name = name;
-    this.connection = connection;
+    try {
+      this.name = name;
+      this.connection = connection;
 
-    this.queue = new Queue(name, { connection: this.connection });
+      this.queue = new Queue(name, { connection: this.connection });
 
-    this.worker = new Worker(name, this.processJob, {
-      connection: this.connection,
-    });
+      this.worker = new Worker(name, this.processJob, {
+        connection: this.connection,
+      });
 
-    this.setupWorkerEvents();
+      this.setupWorkerEvents();
+    } catch (error) {
+      throw error;
+    }
   }
 
   private async processJob(job: Job): Promise<object> {
-    console.log(
-      `Начал обрабатывать инвойс #${job.data.invoice.id} с данными:`,
-      job.data.invoice,
-    );
+    try {
+      console.log(
+          `Начал обрабатывать инвойс #${job.data.invoice.id} с данными:`,
+          job.data.invoice,
+      );
 
-    console.log(job.data.client);
-    console.log(job.data.invoice);
+      await Factory.generateAndSendPdfToClient({
+        client: job.data.client,
+        invoice: job.data.invoice,
+      });
 
-    await Factory.generateAndSendPdfToClient({
-      client: job.data.client,
-      invoice: job.data.invoice,
-    });
-
-    console.log(`Завершил обработку инвойса #${job.data.invoice.id}`);
-    return { received: job.data, processed: true };
+      console.log(`Завершил обработку инвойса #${job.data.invoice.id}`);
+      return { received: job.data, processed: true };
+    } catch (error) {
+      throw error;
+    }
   }
 
   private setupWorkerEvents(): void {
@@ -58,15 +63,23 @@ export default class QueueController {
     });
 
     this.worker.on("failed", (job, err) => {
-      console.log(
-        `Worker '${this.name}': Ошибка в инвойсе ${job?.data.invoice.id}!`,
-        err,
-      );
+      try {
+        console.log(
+            `Worker '${this.name}': Ошибка в инвойсе ${job?.data.invoice.id}!`,
+            err,
+        );
+      } catch (error) {
+        throw error;
+      }
     });
   }
 
   async addDataToQueue(data: object): Promise<Job> {
-    return this.queue.add(this.name, data);
+    try {
+      return this.queue.add(this.name, data);
+    } catch (error) {
+      throw error;
+    }
   }
 
   async close(): Promise<void> {
