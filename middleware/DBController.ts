@@ -82,21 +82,25 @@ export default class DBController {
 
   checkEmailExistsAddInvoiceToLogs = async (invoice: Invoice) => {
     invoice.email = invoice.email.trim();
-    const emailExists = await this.emailExistsInDB(invoice.email);
+    const emailExists: boolean = await this.emailExistsInDB(invoice.email);
     if (!emailExists) {
       console.error("Email не найден в БД: ", invoice.email);
       throw new Error("Email не найден в БД: " + invoice.email);
     }
-    await this.sequelize?.query(
-      "INSERT INTO public.invoice_logs (email, works) VALUES (:email, :invoices)",
-      {
-        replacements: {
-          email: invoice.email,
-          invoices: JSON.stringify(invoice.works),
-        },
-        type: "INSERT",
-      },
-    );
+    try {
+      await this.sequelize?.query(
+          "INSERT INTO public.invoice_logs (email, works) VALUES (:email, :invoices)",
+          {
+            replacements: {
+              email: invoice.email,
+              invoices: JSON.stringify(invoice.works),
+            },
+            type: "INSERT",
+          },
+      );
+    } catch (error) {
+      throw error;
+    }
   };
 
   async getInvoiceFromLogs(email: string): Promise<InvoiceLog> {

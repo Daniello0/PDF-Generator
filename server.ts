@@ -9,6 +9,7 @@ import QueueController, {
 import { Client } from "./models/Client.js";
 import process from "node:process";
 import dotenv from "dotenv";
+import cors from 'cors'
 
 dotenv.config();
 const app = express();
@@ -17,6 +18,7 @@ const dbController = new DBController();
 
 app.use(json());
 app.use(cookieParser());
+app.use(cors())
 
 app.get("/test", (_req, res) => {
   res.send("Hello World");
@@ -49,9 +51,8 @@ app.post("/api/invoice", async (req, res) => {
     await queueController.addDataToQueue({ client: client, invoice: invoice });
   } catch (error) {
     console.error(error);
-    res.sendStatus(500);
+    res.status(500).send({ message: 'Internal Server Error' });
   }
-  res.sendStatus(200);
 });
 
 app.post("/api/client", (_req, res) => {
