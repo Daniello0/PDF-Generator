@@ -7,7 +7,10 @@ import QueueController, {
   redisConnection,
 } from "./middleware/QueueController.js";
 import { Client } from "./models/Client.js";
+import process from "node:process";
+import dotenv from "dotenv";
 
+dotenv.config();
 const app = express();
 
 const dbController = new DBController();
@@ -55,7 +58,7 @@ app.post("/api/client", (_req, res) => {
   res.sendStatus(500);
 });
 
-app.listen(3000, async () => {
+app.listen(process.env.APP_PORT, async () => {
   await dbController.init();
   console.log("Сервер запущен на http://localhost:3000");
 });
