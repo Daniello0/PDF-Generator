@@ -89,14 +89,14 @@ export default class DBController {
     }
     try {
       await this.sequelize?.query(
-          "INSERT INTO public.invoice_logs (email, works) VALUES (:email, :invoices)",
-          {
-            replacements: {
-              email: invoice.email,
-              invoices: JSON.stringify(invoice.works),
-            },
-            type: "INSERT",
+        "INSERT INTO public.invoice_logs (email, works) VALUES (:email, :invoices)",
+        {
+          replacements: {
+            email: invoice.email,
+            invoices: JSON.stringify(invoice.works),
           },
+          type: "INSERT",
+        },
       );
     } catch (error) {
       throw error;

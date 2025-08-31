@@ -20,11 +20,11 @@ export default class Factory {
       const cssString = this.getCssString("./views/PdfView.css");
 
       const reactComponentWithProps = (
-          <PdfView invoice={invoice} client={client} styles={cssString} />
+        <PdfView invoice={invoice} client={client} styles={cssString} />
       );
 
       const pdfBuffer: Buffer = await PdfGenerator.generateInvoicePdf(
-          reactComponentWithProps,
+        reactComponentWithProps,
       );
 
       await MailSender.sendPdfToClient(client.email, pdfBuffer);

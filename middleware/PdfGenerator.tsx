@@ -3,7 +3,9 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 export default class PdfGenerator {
-  static async generateInvoicePdf(reactElement: React.ReactElement): Promise<Buffer> {
+  static async generateInvoicePdf(
+    reactElement: React.ReactElement,
+  ): Promise<Buffer> {
     const htmlPage: string = renderToStaticMarkup(reactElement);
 
     const file = {

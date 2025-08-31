@@ -7,7 +7,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const api = axios.create({
-  baseURL: "http://localhost:"+process.env.APP_PORT,
+  baseURL: "http://localhost:" + process.env.APP_PORT,
 });
 
 async function testPostRequest() {

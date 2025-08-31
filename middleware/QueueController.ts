@@ -37,8 +37,8 @@ export default class QueueController {
   private async processJob(job: Job): Promise<object> {
     try {
       console.log(
-          `Начал обрабатывать инвойс #${job.data.invoice.id} с данными:`,
-          job.data.invoice,
+        `Начал обрабатывать инвойс #${job.data.invoice.id} с данными:`,
+        job.data.invoice,
       );
 
       await Factory.generateAndSendPdfToClient({
@@ -65,8 +65,8 @@ export default class QueueController {
     this.worker.on("failed", (job, err) => {
       try {
         console.log(
-            `Worker '${this.name}': Ошибка в инвойсе ${job?.data.invoice.id}!`,
-            err,
+          `Worker '${this.name}': Ошибка в инвойсе ${job?.data.invoice.id}!`,
+          err,
         );
       } catch (error) {
         throw error;

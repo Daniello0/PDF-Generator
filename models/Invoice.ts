@@ -5,10 +5,8 @@ export interface Work {
 
 export interface InvoiceLog {
   id: number;
-  client_id: number;
-  total_amount: number;
-  status: string;
   created_at: Date;
+  email: string;
   works: string;
 }
 

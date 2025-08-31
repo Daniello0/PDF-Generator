@@ -13,3 +13,7 @@ CREATE TABLE IF NOT EXISTS invoice_logs (
     works        TEXT NOT NULL,
     created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+INSERT INTO clients (first_name, last_name, company_name, email)
+VALUES ('Даниил', 'Киселевский', 'Daniil Inc', 'daniilreservemail@gmail.com')
+ON CONFLICT (email) DO NOTHING;
