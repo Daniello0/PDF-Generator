@@ -8,5 +8,5 @@
  *         message:
  *           type: string
  *           description: 'Подробное описание ошибки.'
- *           example: 'Внутренняя ошибка сервера.'
+ *           example: 'Email не найден в БД: fhryasdkf@gmail.com.'
 */

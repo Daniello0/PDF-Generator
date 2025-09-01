@@ -55,13 +55,15 @@ app.use(express.urlencoded({ extended: true }));
  *     tags:
  *       - Test
  *     summary: Послать тестовый запрос
- *     response:
+ *     responses:
  *       '200':
  *         description: Запрос успешно принят
  */
 app.get("/test", (_req, res) => {
   res.sendStatus(200);
 });
+
+
 /**
  * @swagger
  * /api/invoice:
@@ -69,14 +71,8 @@ app.get("/test", (_req, res) => {
  *     tags:
  *       - Invoices
  *     summary: Создать и поставить в очередь задачу на генерацию счета
- *     description: |
- *       Принимает email клиента и список выполненных работ.
- *       1. Проверяет входные данные.
- *       2. Сохраняет информацию о счете в базу данных.
- *       3. Помещает задачу в очередь BullMQ для асинхронной генерации PDF-файла и отправки его по email.
- *     parameters:
+ *     description: Принимает email клиента и список выполненных работ.
  *     requestBody:
- *       description: Объект с данными для создания счета.
  *       required: true
  *       content:
  *         application/json:
@@ -85,26 +81,15 @@ app.get("/test", (_req, res) => {
  *
  *     responses:
  *       '200':
- *         description: Запрос успешно принят, и задача на создание счета поставлена в очередь.
+ *         description: Успешно. Задача отправлена в очередь.
  *
  *       '500':
  *         description: |
- *           Произошла ошибка. Может быть два варианта:
- *           1. **Ошибка валидации:** Входные данные неполные (отсутствует email или список работ).
- *           2. **Внутренняя ошибка сервера:** Сбой при работе с базой данных, Redis или другой непредвиденный сбой.
+ *           Произошла ошибка.
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
- *           examples:
- *             validationError:
- *               summary: Пример ошибки валидации
- *               value:
- *                 message: "Ошибка! Не все данные введены"
- *             internalError:
- *               summary: Пример внутренней ошибки
- *               value:
- *                 message: "Internal Server Error"
  */
 app.post("/api/invoice", async (req, res) => {
   console.log("Обращение к серверу...");
@@ -143,7 +128,7 @@ app.post("/api/invoice", async (req, res) => {
   } catch (error) {
     console.log("Вызывается обработчик ошибок сервера");
     console.error(error);
-    res.status(500).send({ message: "Internal Server Error" });
+    res.status(500).send({ message: error.message });
   }
 });
 

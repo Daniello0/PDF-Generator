@@ -10,7 +10,7 @@
  *           type: string
  *           format: email
  *           description: 'Email клиента, на который будет отправлен счет.'
- *           example: 'daniilreserve@gmail.com'
+ *           example: 'daniilreservemail@gmail.com'
  *         works:
  *           type: array
  *           description: 'Список выполненных работ.'
