@@ -12,6 +12,7 @@ services:
       - GMAIL_USER=${GMAIL_USER}
       - GMAIL_APP_PASS=${GMAIL_APP_PASS}
       - APP_PORT=${APP_PORT}
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
     depends_on:
       - db
       - redis

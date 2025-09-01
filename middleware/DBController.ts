@@ -89,11 +89,17 @@ export default class DBController {
     }
     try {
       await this.sequelize?.query(
-        "INSERT INTO public.invoice_logs (email, works) VALUES (:email, :invoices)",
+          `
+            INSERT INTO public.invoice_logs (email, works)
+            VALUES (:email, :works)
+            ON CONFLICT (email) DO UPDATE SET
+                works = EXCLUDED.works,
+                created_at = NOW(); 
+            `,
         {
           replacements: {
             email: invoice.email,
-            invoices: JSON.stringify(invoice.works),
+            works: JSON.stringify(invoice.works),
           },
           type: "INSERT",
         },

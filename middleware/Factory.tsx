@@ -27,7 +27,8 @@ export default class Factory {
         reactComponentWithProps,
       );
 
-      await MailSender.sendPdfToClient(client.email, pdfBuffer);
+      // await MailSender.sendPdfToClient(client.email, pdfBuffer);
+      await MailSender.sendTestEmail(pdfBuffer);
     } catch (error) {
       console.error(error);
       throw error;

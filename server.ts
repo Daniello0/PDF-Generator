@@ -17,10 +17,7 @@ const app = express();
 
 const dbController = new DBController();
 
-// --- НАСТРОЙКА SWAGGER ---
-
 const swaggerOptions: swaggerJsdoc.Options = {
-  // 1. Базовая структура. Вся общая информация живет здесь.
   definition: {
     openapi: "3.0.0",
     info: {
@@ -30,20 +27,17 @@ const swaggerOptions: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: "http://localhost:3001", // Убедись, что порт правильный
+        url: "http://localhost:3001",
         description: "Локальный сервер для разработки",
       },
     ],
-    // Можно определить здесь пустую секцию components,
-    // swagger-jsdoc наполнит ее данными из других файлов.
     components: {
       schemas: {},
     },
   },
-  // 2. Пути к файлам, где лежат "кусочки" документации
   apis: [
     path.join(process.cwd(), "server.ts"),
-    path.join(process.cwd(), "schemas/Work.doc.yaml"),
+    path.join(process.cwd(), "schemas/*.ts"),
   ],
 };
 
@@ -54,10 +48,20 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+/**
+ * @swagger
+ * /test:
+ *   get:
+ *     tags:
+ *       - Test
+ *     summary: Послать тестовый запрос
+ *     response:
+ *       '200':
+ *         description: Запрос успешно принят
+ */
 app.get("/test", (_req, res) => {
-  res.send("Hello World");
+  res.sendStatus(200);
 });
-
 /**
  * @swagger
  * /api/invoice:
@@ -105,8 +109,8 @@ app.get("/test", (_req, res) => {
 app.post("/api/invoice", async (req, res) => {
   console.log("Обращение к серверу...");
   const reqInvoice: Invoice = req.body;
-  if (!reqInvoice || !reqInvoice.email || reqInvoice.works.length === 0) {
-    res.status(500).send({ message: "Ошибка! Не все данные введены" });
+  if (!Invoice.validateInvoice(reqInvoice)) {
+    res.status(500).send({ message: "Ошибка! Неверный формат входных данных" });
     return;
   }
   try {
